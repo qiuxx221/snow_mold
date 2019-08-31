@@ -1,1 +1,46 @@
+#mapping reads to the NR ISO reference transcriptome 
+##Timepoint 3 this case 
 
+#!/bin/sh
+#PBS -l walltime=24:00:00,nodes=1:ppn=8,mem=62gb
+#PBS -o /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/out
+#PBS -e /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/error
+#PBS -N RSEM_NR_ISO_WP4_1
+#PBS -M qiuxx221@umn.edu
+#PBS -m abe
+#PBS -r n
+
+module load rsem
+module load perl 
+module load bowtie2
+
+cd /scratch.global/qiu1010/RSEM_NR_ISO_TP4
+
+###Fungicide treated group
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/FP4_1_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/FP4_1_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP4_1_RSEM
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/FP4_2_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/FP4_2_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP4_2_RSEM
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/FP4_3_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/FP4_3_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP4_3_RSEM
+
+###Water treated group 
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/WP4_1_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/WP4_1_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP4_1_RSEM
+
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/WP4_2_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/WP4_2_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP4_2_RSEM
+
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Snow_mold_Project/WP4_3_R1_trimmed.fastq ~/Sequencing_reads/Snow_mold_Project/WP4_3_R2_trimmed.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP4_3_RSEM
