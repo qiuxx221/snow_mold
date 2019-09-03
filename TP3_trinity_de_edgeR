@@ -29,4 +29,11 @@ perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
 --matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
 
+#dispersion 0.4 
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl \
+--matrix Trinity_trans.isoform.counts.matrix --method edgeR --samples_file samples_list.txt --dispersion 0.2
 
+/home/watkinse/qiuxx221/Result_files/Fungicide_project/fungicid_paper/RSEM_NR_ISO_keep/edgeR.8027.dir
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
