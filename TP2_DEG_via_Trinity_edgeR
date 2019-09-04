@@ -47,5 +47,7 @@ grep -f DE_gene_ID_for_fetching_annotation.txt ~/Result_files/ISO_Annotation/ncb
 grep -f DE_gene_ID_for_fetching_annotation.txt ~/Result_files/ISO_Annotation/ncbi_NR/NR_unique_hits.txt > Annotated_DE_gene.txt
 #returned with 232, need to remove fetched wrong sequence in excel 
 =VLOOKUP(A1,DE_gene_ID_for_fetching_annotation.txt!$A$2:$A$176,1,FALSE)
+#Several gene doesn't have annotation, might need to look for other ways to annotated it 
 
-
+#Gene ID with Gene FC and Annotation was stored at 
+https://docs.google.com/spreadsheets/d/1df2j-wveQPu6ZnqyJ8lo5amhLbqBVh-mrpcY7w1DxX8/edit?usp=sharing
