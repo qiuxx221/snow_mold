@@ -24,17 +24,28 @@ conditionB WT2_3_RSEM
 
 #Trinity_trans.isoform.counts.matrix to calculate DE
 
-perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl \
---matrix Trinity_gene.isoform.counts.matrix --method edgeR --samples_file samples_list.txt --dispersion 0.2
-
-perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
-
-#edgeR.19617.dir/
-
 ###USE THIS PART IN THE MANUSCRIPT
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl \
 --matrix Trinity_gene.isoform.counts.matrix --method edgeR --samples_file samples_list.txt --dispersion 0.4
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
 --matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 0.05 -C 2 --samples ../samples_list.txt 
+
+* Found 175 features as differentially expressed.
+
+#grep gene ID with differential expression to fetch gene annotation 
+176 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P0.05_C2.DE.subset
+
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P0.05_C2.DE.subset > DE_gene_ID_FC.txt
+
+cut -f 1 DE_gene_ID_FC.txt > DE_gene_ID_for_fetching_annotation.txt
+
+#fetch annotation using unix commands
+grep -f DE_gene_ID_for_fetching_annotation.txt ~/Result_files/ISO_Annotation/ncbi_NR/NR_unique_hits.txt > Annotated_DE_gene.txt
+
+#get gene ID and annotation 
+grep -f DE_gene_ID_for_fetching_annotation.txt ~/Result_files/ISO_Annotation/ncbi_NR/NR_unique_hits.txt > Annotated_DE_gene.txt
+#returned with 232, need to remove fetched wrong sequence in excel 
+=VLOOKUP(A1,DE_gene_ID_for_fetching_annotation.txt!$A$2:$A$176,1,FALSE)
+
+
