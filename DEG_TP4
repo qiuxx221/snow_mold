@@ -1,0 +1,28 @@
+#create matrix 
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none  FP4_1_RSEM.genes.results FP4_2_RSEM.genes.results FP4_3_RSEM.genes.results \
+WP4_1_RSEM.genes.results WP4_2_RSEM.genes.results WP4_3_RSEM.genes.results
+
+#remove FP2/WT3 
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none  FP4_1_RSEM.genes.results FP4_3_RSEM.genes.results \
+WP4_1_RSEM.genes.results WP4_2_RSEM.genes.results 
+
+#create sample list
+
+conditionA FP4_1_RSEM
+conditionA FP4_2_RSEM
+conditionA FP4_3_RSEM
+
+conditionB WP4_1_RSEM
+conditionB WP4_2_RSEM
+conditionB WP4_3_RSEM
+
+#Call DEG
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl \
+--matrix Trinity_gene.isoform.counts.matrix --method edgeR --samples_file samples_list.txt --dispersion 0.2
+
+#generate figures 
+
+
