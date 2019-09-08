@@ -1,0 +1,19 @@
+#!/bin/sh
+#PBS -l walltime=30:00:00,nodes=1:ppn=24,mem=62gb
+#PBS -o /home/watkinse/qiuxx221/Result_files/Isoseq/out
+#PBS -e /home/watkinse/qiuxx221/Result_files/Isoseq/error
+#PBS -N trinity_normalization 
+#PBS -M qiuxx221@umn.edu
+#PBS -m abe
+#PBS -r n
+
+export PATH=$PATH:/panfs/roc/msisoft/trinityrnaseq/2.5.1/util
+cd /home/watkinse/qiuxx221/Sequencing_reads/Fungicide_Project/FP5
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/util/insilico_read_normalization.pl --seqType fq --JM 62G --max_cov 50 \
+--left FP5C_1_R1_trimmed.fastq FP5C_2_R1_trimmed.fastq FP5C_3_R1_trimmed.fastq FP5S_1_R1_trimmed.fastq FP5S_2_R1_trimmed.fastq FP5S_3_R1_trimmed.fastq \
+WP5C_1_R1_trimmed.fastq WP5C_2_R1_trimmed.fastq WP5C_3_R1_trimmed.fastq WP5S_1_R1_trimmed.fastq WP5S_2_R1_trimmed.fastq WP5S_3_R1_trimmed.fastq \
+--right FP5C_1_R2_trimmed.fastq FP5C_2_R2_trimmed.fastq FP5C_3_R2_trimmed.fastq FP5S_1_R2_trimmed.fastq FP5S_2_R2_trimmed.fastq FP5S_3_R2_trimmed.fastq \
+WP5C_1_R2_trimmed.fastq WP5C_2_R2_trimmed.fastq WP5C_3_R2_trimmed.fastq WP5S_1_R2_trimmed.fastq WP5S_2_R2_trimmed.fastq WP5S_3_R2_trimmed.fastq \
+--output /scratch.global/qiu1010/SM_normalization
+
