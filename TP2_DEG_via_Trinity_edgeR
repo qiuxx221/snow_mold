@@ -1,7 +1,6 @@
 #Trinity on MSI
 /panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
-/panfs/roc/msisoft/R/3.3.3/bin/R
-export PATH="/panfs/roc/msisoft/R/3.3.3/bin/R:$PATH"
+module load R
 
 #First, join the RSEM-estimated abundance values for each of your samples by running the following
 #given transcript or gene-level abundance estimates from RSEM or eXpress:
@@ -49,5 +48,4 @@ grep -f DE_gene_ID_for_fetching_annotation.txt ~/Result_files/ISO_Annotation/ncb
 =VLOOKUP(A1,DE_gene_ID_for_fetching_annotation.txt!$A$2:$A$176,1,FALSE)
 #Several gene doesn't have annotation, might need to look for other ways to annotated it 
 
-#Gene ID with Gene FC and Annotation was stored at 
-https://docs.google.com/spreadsheets/d/1df2j-wveQPu6ZnqyJ8lo5amhLbqBVh-mrpcY7w1DxX8/edit?usp=sharing
+
