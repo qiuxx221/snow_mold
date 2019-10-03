@@ -29,4 +29,7 @@ perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/anal
 --matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
 
 
-grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt SM_TP5_test_ID1.txt > DE.P450.txt
+
+grep -Fwf /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out DE.P450.txt > DE.P450_name.txt
+
+grep -w -F -f DE.P450.txt  /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
