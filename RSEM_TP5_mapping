@@ -45,7 +45,23 @@ rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/WP5C_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/WP5C_3_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5C_3_RSEM
 
+
+WP5C_1_RSEM
+174052424 + 0 in total (QC-passed reads + QC-failed reads)
+104928362 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+148133700 + 0 mapped (85.11% : N/A)
+69124062 + 0 paired in sequencing
+34562031 + 0 read1
+34562031 + 0 read2
+43205338 + 0 properly paired (62.50% : N/A)
+43205338 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
 ####################################################################################################################################
+
 
 #Water treated snow mold group 
 gunzip WP5C*
@@ -88,14 +104,28 @@ rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_3_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_3_RSEM
 
+
+####################################################################################################################################
+####################################################################################################################################
+####################################################################################################################################
 ####################################################################################################################################
 
+#Fungicide treated reads without snow mold 
+
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_1_R1_trimmed.fastq > FP5C_1_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_1_R2_trimmed.fastq > FP5C_1_R2_clean.fastq
+
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_2_R1_trimmed.fastq > FP5C_2_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_2_R2_trimmed.fastq > FP5C_2_R2_clean.fastq
+
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_3_R1_trimmed.fastq > FP5C_3_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5C_3_R2_trimmed.fastq > FP5C_3_R2_clean.fastq
 
 #!/bin/sh
-#PBS -l walltime=15:00:00,nodes=1:ppn=8,mem=40gb
+#PBS -l walltime=24:00:00,nodes=1:ppn=12,mem=40gb
 #PBS -o /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/out
 #PBS -e /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/error
-#PBS -N RSEM_NR_ISO_FP5S1
+#PBS -N RSEM_NR_ISO_TP5FC
 #PBS -M qiuxx221@umn.edu
 #PBS -m abe
 #PBS -r n
@@ -106,42 +136,39 @@ module load bowtie2
 
 cd /scratch.global/qiu1010/RSEM_NR_ISO_TP5
 
-###Fungicide treated group with water inoculation
-
 rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R2_trimmed.fastq \
+~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5C_1_RSEM
 
 rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R2_trimmed.fastq \
+~/Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5C_2_RSEM
 
 rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R2_trimmed.fastq \
+~/Sequencing_reads/Fungicide_Project/FP5/FP5C_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_3_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5C_3_RSEM
+
+
+####################################################################################################################################
+####################################################################################################################################
+
 
 ###Fungicide treated group with snow mold 
 
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_1_RSEM
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_1_R1_trimmed.fastq > FP5S_1_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_1_R2_trimmed.fastq > FP5S_1_R2_clean.fastq
 
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5S_2_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5S_2_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_2_RSEM
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_2_R1_trimmed.fastq > FP5S_2_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_2_R2_trimmed.fastq > FP5S_2_R2_clean.fastq
 
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_3_RSEM
-
-
-
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_3_R1_trimmed.fastq > FP5S_3_R1_clean.fastq
+/home/watkinse/qiuxx221/Programs/seqtk/seqtk trimfq -q 0.05 FP5S_3_R2_trimmed.fastq > FP5S_3_R2_clean.fastq
 
 #!/bin/sh
-#PBS -l walltime=15:00:00,nodes=1:ppn=8,mem=40gb
+#PBS -l walltime=24:00:00,nodes=1:ppn=12,mem=40gb
 #PBS -o /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/out
 #PBS -e /home/watkinse/qiuxx221/Programs/RSEM/RSEM_ref/error
-#PBS -N RSEM_NR_ISO_WP5C2
+#PBS -N RSEM_NR_ISO_TP5FS
 #PBS -M qiuxx221@umn.edu
 #PBS -m abe
 #PBS -r n
@@ -152,31 +179,15 @@ module load bowtie2
 
 cd /scratch.global/qiu1010/RSEM_NR_ISO_TP5
 
-###Water treated group with snow mold 
+rsem-calculate-expression --paired-end --bowtie2 \
+~/Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5S_1_R2_clean.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_1_RSEM
 
 rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5S_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5S_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_1_RSEM
+~/Sequencing_reads/Fungicide_Project/FP5/FP5S_2_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5S_2_R2_clean.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_2_RSEM
 
 rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5S_2_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5S_2_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_2_RSEM
+~/Sequencing_reads/Fungicide_Project/FP5/FP5S_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5S_3_R2_clean.fastq \
+~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5S_3_RSEM
 
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5S_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5S_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_3_RSEM
-
-
-###Water treated group without snow mold 
-
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5C_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5C_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5C_1_RSEM
-
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5C_2_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5C_2_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5C_2_RSEM
-
-rsem-calculate-expression --paired-end --bowtie2 \
-~/Sequencing_reads/Fungicide_Project/WP5/WP5C_1_R1_trimmed.fastq ~Sequencing_reads/Fungicide_Project/WP5/WP5C_1_R2_trimmed.fastq \
-~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5C_3_RSEM
