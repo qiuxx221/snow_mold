@@ -1,3 +1,8 @@
+#All expression dataset has been put in folder 
+
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_WS_WC
+
+
 #preparing data matrix, saved as 
 # samples_list.txt
 
@@ -10,9 +15,15 @@ conditionB WP5C_2_RSEM
 conditionB WP5C_3_RSEM
 
 #Trinity on MSI
-/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
-/panfs/roc/msisoft/R/3.3.3/bin/R
+#/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
+#/panfs/roc/msisoft/R/3.3.3/bin/R
 export PATH="/panfs/roc/msisoft/R/3.3.3/bin/R:$PATH"
+module load  trinity/2.5.1
+module load R 
+#enter R, enter 
+library(edgeR) 
+#quit, using 
+quit()
 
 #First, join the RSEM-estimated abundance values for each of your samples by running the following
 #given transcript or gene-level abundance estimates from RSEM or eXpress:
