@@ -2,6 +2,24 @@
 
 /home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_WS_WC
 
+#Estimate dispersion using edgeR
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > WP5_gene_counts.matrix
+
+module load R
+library(edgeR)
+
+Data_in <- read.table("WP5_gene_counts.matrix")
+DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control","Control")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.13442 , BCV = 0.3666 
 
 #preparing data matrix, saved as 
 # samples_list.txt
@@ -34,11 +52,45 @@ WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results
 
 #Trinity_trans.isoform.counts.matrix to calculate DE
 
-perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix --method edgeR --samples_file samples_list.txt --dispersion 0.2
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
+--method edgeR --samples_file samples_list.txt --dispersion 0.134
+
+
+#0.001 threshold with 715 genes differentially expressed 
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
 --matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
 
+#list gene ID and fold change of each group 
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
 
-grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt SM_TP5_test_ID1.txt > DE.P450.txt
+cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
+cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
+
+#########get annotation of the P450 transcript, and fold change 
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+
+
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out ConditionA_up_ID.txt
+grep -Fwf DE_A_up.P450.txt /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
+grep -Fwf DE_A_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset
+
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+grep -Fwf DE_B_up.P450.txt /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
+grep -Fwf DE_B_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset
+
+#########Get gene GO function enrichment 
+#GO annotation file 
+/home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt
+cut -f 1 /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > KEGG_Ref_ID.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionA_up_ID.txt > KEGG_GO_condition_A.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionB_up_ID.txt > KEGG_GO_condition_B.txt
+
+grep -Fwf KEGG_GO_condition_A.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_A.txt
+grep -Fwf KEGG_GO_condition_B.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_B.txt
+
+
+
 
