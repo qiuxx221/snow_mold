@@ -1,0 +1,149 @@
+#All expression dataset has been put in folder 
+
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_FC_WC
+
+#Estimate dispersion using edgeR
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > FP5_gene_counts.matrix
+R/3.3.0
+module load R
+#enter R
+
+library(edgeR)
+
+Data_in <- read.table("FP5_gene_counts.matrix")
+DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control","Control")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.22749 , BCV = 0.477 
+
+#preparing data matrix, saved as 
+# samples_list.txt
+
+conditionA FP5C_1_RSEM
+conditionA FP5C_2_RSEM
+conditionA FP5C_3_RSEM
+
+conditionB WP5C_1_RSEM
+conditionB WP5C_2_RSEM
+conditionB WP5C_3_RSEM
+
+#Trinity on MSI
+#/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
+#/panfs/roc/msisoft/R/3.3.3/bin/R
+export PATH="/panfs/roc/msisoft/R/3.3.3/bin/R:$PATH"
+module load  trinity/2.5.1
+module load R 
+#enter R, enter 
+library(edgeR) 
+#quit, using 
+quit()
+
+#First, join the RSEM-estimated abundance values for each of your samples by running the following
+#given transcript or gene-level abundance estimates from RSEM or eXpress:
+
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results
+
+#Trinity_trans.isoform.counts.matrix to calculate DE
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
+--method edgeR --samples_file samples_list.txt --dispersion 0.22749
+
+
+#0.001 threshold with 16 genes differentially expressed 
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+
+#list gene ID and fold change of each group 
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
+
+cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
+cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
+
+#########get annotation of the P450 transcript, and fold change 
+####NO GENE WAS FOUND 
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+
+####Obtaining NCBI NR annotation
+grep -Fwf ConditionA_up_ID.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/ncbi_NR/blast.NR_uniq.out > DE_A_up.txt
+grep -Fwf  ConditionA_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset
+
+grep -Fwf ConditionB_up_ID.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/ncbi_NR/blast.NR_uniq.out > DE_B_up.txt
+grep -Fwf ConditionB_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset
+
+++++++++++++
+
+
+
+
+++++++++++++
+
+Remove WP5C_3 due to the really low correlation for this data comparision
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results > FP5_gene_counts.matrix
+R/3.3.0
+module load R
+#enter R
+
+library(edgeR)
+
+Data_in <- read.table("FP5_gene_counts.matrix")
+DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.22749 , BCV = 0.477 
+
+#preparing data matrix, saved as 
+# samples_list.txt
+
+conditionA FP5C_1_RSEM
+conditionA FP5C_2_RSEM
+conditionA FP5C_3_RSEM
+
+conditionB WP5C_1_RSEM
+conditionB WP5C_2_RSEM
+conditionB WP5C_3_RSEM
+
+#Trinity on MSI
+#/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
+#/panfs/roc/msisoft/R/3.3.3/bin/R
+export PATH="/panfs/roc/msisoft/R/3.3.3/bin/R:$PATH"
+module load  trinity/2.5.1
+module load R 
+#enter R, enter 
+library(edgeR) 
+#quit, using 
+quit()
+
+#First, join the RSEM-estimated abundance values for each of your samples by running the following
+#given transcript or gene-level abundance estimates from RSEM or eXpress:
+
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results
+
+#Trinity_trans.isoform.counts.matrix to calculate DE
+
+cd 
+
+#0.001 threshold with 16 genes differentially expressed 
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
