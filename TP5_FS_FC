@@ -1,0 +1,63 @@
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_FC_FS
+
+
+#preparing data matrix, saved as 
+# samples_list.txt
+
+conditionA FP5S_1_RSEM
+conditionA FP5S_2_RSEM
+conditionA FP5S_3_RSEM
+
+conditionB FP5C_1_RSEM
+conditionB FP5C_2_RSEM
+conditionB FP5C_3_RSEM
+
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results > FP5_gene_counts.matrix
+
+module load R/3.3.0
+#enter R
+
+library(edgeR)
+
+Data_in <- read.table("FP5_gene_counts.matrix")
+DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control","Control")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.23562 , BCV = 0.4854 
+
+
+#Trinity on MSI
+#/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
+#/panfs/roc/msisoft/R/3.3.3/bin/R
+export PATH="/panfs/roc/msisoft/R/3.3.3/bin/R:$PATH"
+module load  trinity/2.5.1
+module load R 
+#enter R, enter 
+library(edgeR) 
+#quit, using 
+quit()
+
+#First, join the RSEM-estimated abundance values for each of your samples by running the following
+#given transcript or gene-level abundance estimates from RSEM or eXpress:
+
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results
+
+#Trinity_trans.isoform.counts.matrix to calculate DE
+
+#0.001 threshold with 16 genes differentially expressed 
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+
+
+
+######look for P450 genes 
