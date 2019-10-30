@@ -1,0 +1,17 @@
+#!/bin/sh
+#PBS -l walltime=56:00:00,nodes=1:ppn=24,mem=62gb
+#PBS -o /home/watkinse/qiuxx221/Result_files/Isoseq/out
+#PBS -e /home/watkinse/qiuxx221/Result_files/Isoseq/error
+#PBS -N trinity_TP5_de_novo
+#PBS -M qiuxx221@umn.edu
+#PBS -m abe
+#PBS -r n
+
+module load trinity/2.5.1
+cd /home/watkinse/qiuxx221/Sequencing_reads/Fungicide_Project/FP5
+
+Trinity --seqType fq \
+--left 
+--right  
+--max_memory 62G --CPU 24 --normalize_reads --bflyCalculateCPU  --min_contig_length 200 \
+--monitoring --output /scratch.global/qiu1010/TP5_de_novo_trinity
