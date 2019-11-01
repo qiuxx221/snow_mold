@@ -1,0 +1,86 @@
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_ALL
+
+#Estimate dispersion using edgeR
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > All_gene_counts.matrix
+
+
+module load R/3.3.3
+
+library(edgeR)
+
+Data_in <- read.table("All_gene_counts.matrix")
+
+DataGroups <- c("FS", "FS", "FS", "FC","FC","WS", "WS", "WS", "WC", "WC","WC")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.12347 , BCV = 0.3514 
+
+#preparing data matrix, saved as 
+# samples_list.txt
+
+conditionA FP5S_1_RSEM
+conditionA FP5S_2_RSEM
+conditionA FP5S_3_RSEM
+
+conditionB FP5C_2_RSEM
+conditionB FP5C_3_RSEM
+
+conditionC WP5S_1_RSEM
+conditionC WP5S_2_RSEM
+conditionC WP5S_3_RSEM
+
+conditionD WP5C_1_RSEM
+conditionD WP5C_2_RSEM
+conditionD WP5C_3_RSEM
+
+
+#First, join the RSEM-estimated abundance values for each of your samples by running the following
+#given transcript or gene-level abundance estimates from RSEM or eXpress:
+
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results
+
+
+#calculate global gene expression correlation 
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_ALL/correlation
+
+All_gene_counts.matrix 
+module load R
+
+library(reshape2)
+mydata <- read.table("All_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+melted_cormat <- melt(cormat)
+
+quantile_range <- quantile(melted_cormat, probs = seq(0, 1, 0.1))
+color_palette <- colorRampPalette(c("#3794bf", "#FFFFFF", "#df8640"))(length(quantile_range) - 1)
+label_text <- rollapply(round(quantile_range, 2), width = 2, by = 1, FUN = function(i) paste(i, collapse = " : "))
+ 
+
+
+library(ggplot2)
+raw <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile() +
+  scale_fill_manual(values = color_palette, name = "")
+  
+p2 <- raw + theme(axis.text.x = element_text(color="black", 
+                                           size=12, angle=90),
+                axis.text.y = element_text(face="bold", color="black", 
+                                           size=12, angle=0))
+
