@@ -1,0 +1,91 @@
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_ALL
+
+#Estimate dispersion using edgeR
+
+module load perl 
+module load rsem
+rsem-generate-data-matrix FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > All_gene_counts.matrix
+
+
+module load R/3.3.3
+
+library(edgeR)
+
+Data_in <- read.table("All_gene_counts.matrix")
+
+DataGroups <- c("FS", "FS", "FS", "FC", "FC","FC","WS", "WS", "WS", "WC", "WC","WC")
+d <- DGEList(counts=Data_in,group=factor(DataGroups))
+design <- model.matrix(~0+DataGroups)
+colnames(design) <- levels(DataGroups)
+#without doing 
+d1 <- estimateCommonDisp(d, verbose=T)
+Disp = 0.18579 , BCV = 0.431 
+
+#preparing data matrix, saved as 
+# samples_list.txt
+
+conditionA FP5S_1_RSEM
+conditionA FP5S_2_RSEM
+conditionA FP5S_3_RSEM
+
+conditionB FP5C_1_RSEM
+conditionB FP5C_2_RSEM
+conditionB FP5C_3_RSEM
+
+conditionC WP5S_1_RSEM
+conditionC WP5S_2_RSEM
+conditionC WP5S_3_RSEM
+
+conditionD WP5C_1_RSEM
+conditionD WP5C_2_RSEM
+conditionD WP5C_3_RSEM
+
+
+#First, join the RSEM-estimated abundance values for each of your samples by running the following
+#given transcript or gene-level abundance estimates from RSEM or eXpress:
+
+/panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
+--out_prefix Trinity_gene --gene_trans_map none FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
+FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
+WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results
+
+
+#calculate global gene expression correlation 
+/home/watkinse/qiuxx221/Result_files/Fungicide_NGS/Expression_dataset/TP5_ALL/correlation
+
+All_gene_counts.matrix 
+module load R
+
+mydata <- read.table("All_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+
+melted_cormat <- melt(cormat)
+
+library(ggplot2)
+raw <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+p2 <- raw + theme(axis.text.x = element_text(color="black", 
+                                           size=12, angle=90),
+                axis.text.y = element_text(face="bold", color="black", 
+                                           size=12, angle=0))
+
+
+
+#Trinity_trans.isoform.counts.matrix to calculate DE
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
+--method edgeR --samples_file samples_list.txt --dispersion 0.18579
+
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
+
+
