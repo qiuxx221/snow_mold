@@ -70,12 +70,17 @@ head(cormat)
 melted_cormat <- melt(cormat)
 
 library(ggplot2)
-raw <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
-  geom_tile()
+
+raw <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2)) +
+  geom_tile(aes(fill = value) + 
+  scale_fill_gradient('value', limits=c(0, 1), breaks = c(0, 0.25, 0.5, 0.75, 1),  low = "lightblue", high = "darkblue")
+  
+  
 p2 <- raw + theme(axis.text.x = element_text(color="black", 
                                            size=12, angle=90),
                 axis.text.y = element_text(face="bold", color="black", 
-                                           size=12, angle=0))
+                                           size=12, angle=0)) + 
+                geom_text(aes(label = round(value, 1)))
 
 
 
