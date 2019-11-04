@@ -9,6 +9,25 @@ module load rsem
 rsem-generate-data-matrix WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results \
 WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > WP5_gene_counts.matrix
 
+
+#QC dataset 
+module load R/3.3.3
+library(ggplot2)
+library(reshape2)
+mydata <- read.table("WP5_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+melted_cormat <- melt(cormat)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+
+#Correlation looks good 
+#move on to analysis 
+
 module load R
 library(edgeR)
 
@@ -59,11 +78,11 @@ perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_
 #0.001 threshold with 715 genes differentially expressed 
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
 
 #list gene ID and fold change of each group 
-cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
-cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
 
 cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
 cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
@@ -72,16 +91,60 @@ cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
 grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
 grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
 
+#37 P450 genes upregulated 
+#1 P450 gene downregulated 
 
+#Fold change 
 grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out ConditionA_up_ID.txt
 grep -Fwf DE_A_up.P450.txt /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
-grep -Fwf DE_A_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset
+grep -Fwf DE_A_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset
+
+###transcript/34683	conditionA	conditionB	5.41043867640311	2.75028223046644	3.51080202136555e-11	1.27865005437234e-08	1.765.307	16.929	0.068	0.191	0.301
+transcript/33069	conditionA	conditionB	3.87527318351523	3.98380795832577	1.23213717891354e-10	3.83398025089116e-08	14.249	19.846	18.489	0.329	2.634	0.563
+transcript/33134	conditionA	conditionB	9.10262330705729	0.84204519315776	2.31242644516785e-10	6.22800567795207e-08	0.760.881	4.343	0.000	0.000	0.000
+transcript/32136	conditionA	conditionB	2.84876742155951	2.92135408901641	5.50433612770739e-10	1.29716156538987e-07	6.214.959	12.417	0.891	1.407	0.924
+transcript/37027	conditionA	conditionB	5.60950182212109	2.93592377042288	1.26613929642198e-08	1.80354508668108e-06	2.073.258	23.744	0.107	0.428	0.030
+transcript/30273	conditionA	conditionB	3.47595560908883	2.46971389955063	1.41993416569372e-08	2.00970336020851e-06	5.392.336	8.648	0.387	0.844	0.211
+transcript/26644	conditionA	conditionB	3.10555157155418	4.39378177779006	1.47698854069881e-08	2.04040873833607e-06	26.868	12.674	17.201	0.455	2.836	3.225
+transcript/26020	conditionA	conditionB	9.62420547300794	1.33561920359431	1.39127692380531e-07	1.28874061872717e-05	6.570.604	0.122	0.000	0.000	0.000
+transcript/33741	conditionA	conditionB	2.51818111000712	4.97351183803891	2.13196899829534e-07	1.85175085082292e-05	36.652	29.057	32.899	3.109	11.176	2.552
+transcript/36093	conditionA	conditionB	3.28067699054767	4.57738639663259	4.42848535983206e-07	3.30076641354924e-05	26.119	27.213	29.534	0.620	6.573	1.125
+transcript/35356	conditionA	conditionB	2.53145025416882	6.91479363226049	5.9630731354553e-06	0.000271087225519635	54.010	53.196	277.066	19.682	27.924	17.912
+transcript/33344	conditionA	conditionB	2.51690553353427	6.49477463025404	6.27164859347591e-06	0.000281916321768447	40.159	37.069	195.881	14.578	20.102	12.307
+transcript/31241	conditionA	conditionB	4.3764321850372	4.51204672522773	7.45852012762593e-06	0.000326119468063317	63.718	8.100.902	0.823	1.204	1.427
+transcript/40052	conditionA	conditionB	5.59909373633074	-0.676868117221647	7.57458011753536e-06	0.000329844147781261	0.870.164	1.222	0.039	0.000	0.000
+transcript/34450	conditionA	conditionB	2.5473448627387	4.12206724865902	8.38798059489628e-06	0.00035513180722117	34.746	14.949	4.314	1.898	4.041	3.144
+transcript/30665	conditionA	conditionB	3.39106096456171	1.12148698156206	1.05359829069529e-05	0.000424413522996642	2.351.301	2.980	0.203	0.371	0.040
+transcript/32838	conditionA	conditionB	2.26652630536832	7.15730791062294	3.07358073957722e-05	0.000961056221497072	62.562	65.112	310.952	26.037	39.461	24.282
+transcript/37920	conditionA	conditionB	3.22996128614042	0.696033545301215	3.23984498922306e-05	0.0010042266141644	2.801.875	0.912	0.058	0.338	0.181
+transcript/35911	conditionA	conditionB	3.35503207646027	2.0039205152804	3.62547119681373e-05	0.00109722711858244	10.059	2.800.771	0.339	0.675	0.281
+transcript/38621	conditionA	conditionB	3.02768179825641	0.326328213074695	3.95774244036185e-05	0.00117558521977384	2.091.107	1.072	0.281	0.101	0.111
+transcript/37048	conditionA	conditionB	3.8312725825279	2.72883615776052	4.30397939579763e-05	0.00124791798280215	21.549	1.760.724	0.475	0.597	0.583
+transcript/35131	conditionA	conditionB	2.71519474119113	1.77331039332346	4.30636013686202e-05	0.00124791798280215	3.362.982	4.709	0.194	1.159	0.281
+transcript/30465	conditionA	conditionB	4.72769980045053	1.89765237784738	5.36978099722163e-05	0.00148107987057619	10.713	0.738	0.244	0.145	0.045	0.251
+transcript/35313	conditionA	conditionB	3.15004983966616	3.94622080277775	6.88287080415035e-05	0.00179077561438081	38.529	9.928	3.111	0.833	4.041	0.804
+transcript/25882	conditionA	conditionB	4.28846269630436	3.33487736272695	6.965366202096e-05	0.00181054328286437	25.503	1.916	0.884	0.107	1.058	0.251
+transcript/35310	conditionA	conditionB	2.52879975564958	4.68969470518424	8.04467701396876e-05	0.00202623110613097	9.017.879	65.619	4.059	4.817	5.244
+transcript/33378	conditionA	conditionB	2.88976517227894	1.09352831011994	9.16185471101316e-05	0.00224321958355975	0.752.213	3.487	0.184	0.180	0.482
+transcript/34926	conditionA	conditionB	2.34986964999362	4.76727415899487	0.000104158902062893	0.00247097913480067	9.1610.881	62.969	3.913	7.350	4.782
+transcript/36793	conditionA	conditionB	3.78276189156515	2.63651675866763	0.000127987304201726	0.00292790371139567	18.563	2.377	1.231	0.058	1.092	0.422
+transcript/32255	conditionA	conditionB	2.7154052699364	3.35030125855123	0.000187916922328693	0.00393129070537508	21.274	5.223.920	0.368	3.140	1.065
+transcript/39611	conditionA	conditionB	2.07763100320804	1.46453062276517	0.000196613810500626	0.00407862305925247	4.182.592	2.435	0.513	0.900	0.733
+transcript/33191	conditionA	conditionB	3.14244858664208	1.27446471534004	0.000286425203188389	0.00547728386765386	2.911.701	2.886	0.029	0.709	0.111
+transcript/36036	conditionA	conditionB	2.47839260135706	2.13679949416631	0.000330158197593095	0.00613300989385761	1.283.227	9.616	0.407	1.058	1.035
+transcript/36365	conditionA	conditionB	2.03300095719143	2.00588813187578	0.00037645112766911	0.00679406300433866	7.043.555	1.805	0.736	0.934	1.316
+transcript/38582	conditionA	conditionB	2.68831790279681	2.68280782157946	0.000445736501813119	0.00773462635793744	16.894	4.109	1.673	0.513	2.240	0.673
+transcript/34695	conditionA	conditionB	2.28765132681463	3.55364984255631	0.000456784532210312	0.00787517173606267	23.398	8.227	3.995	0.998	4.828	1.356
+transcript/37946	conditionA	conditionB	2.04460581225984	2.79522168204051	0.000574644343128313	0.00936793041569808	13.936	3.330	4.982	1.162	3.174	0.924
+
 
 grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
 grep -Fwf DE_B_up.P450.txt /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
-grep -Fwf DE_B_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset
+grep -Fwf DE_B_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset
 
-#########Get gene GO function enrichment 
+transcript/38590	conditionA	conditionB	-2.30347403167234	1.87477460727324	1.91780644348167e-05	0.000665933873386647	0.474	0.635	1.363	4.543	3.095	4.440
+
+#########Get gene KEGG function enrichment 
 #GO annotation file 
 /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt
 cut -f 1 /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > KEGG_Ref_ID.txt
@@ -91,6 +154,18 @@ grep -Fxf KEGG_Ref_ID.txt ConditionB_up_ID.txt > KEGG_GO_condition_B.txt
 grep -Fwf KEGG_GO_condition_A.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_A.txt
 grep -Fwf KEGG_GO_condition_B.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_B.txt
 
+#for KEGG mapper 
+cut -f 2 GO_terms_B.txt 
 
+#downregulated
+grep "transcript/30657" Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset 
+transcript/30657	conditionA	conditionB	-2.56432366614592	1.99878794633646	2.1610816865462e-06	0.000120247687593413	0.654	0.871	0.479	2.470	6.010	3.084
+
+#upregulated 
+grep "transcript/52878" Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset
+transcript/52878	conditionA	conditionB	3.9911439891474	1.01104322386837	1.33546871541045e-06	7.94095961575232e-05	1.820	9.057	6.505	0.068	0.484	0.482
+
+grep "transcript/52931" Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset
+transcript/52931
 
 
