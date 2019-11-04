@@ -6,27 +6,40 @@
 
 module load perl 
 module load rsem
-rsem-generate-data-matrix FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+rsem-generate-data-matrix FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
 WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results > FP5_gene_counts.matrix
-R/3.3.0
-module load R
+module load R/3.3.3
 #enter R
+
+#QC dataset 
+module load R/3.3.3
+library(ggplot2)
+library(reshape2)
+mydata <- read.table("FP5_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+melted_cormat <- melt(cormat)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
 
 library(edgeR)
 
 Data_in <- read.table("FP5_gene_counts.matrix")
-DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control","Control")
+DataGroups <- c("Treated", "Treated", "Control", "Control","Control")
 d <- DGEList(counts=Data_in,group=factor(DataGroups))
 design <- model.matrix(~0+DataGroups)
 colnames(design) <- levels(DataGroups)
 #without doing 
 d1 <- estimateCommonDisp(d, verbose=T)
-Disp = 0.22749 , BCV = 0.477 
+Disp = 0.09449 , BCV = 0.3074 
 
 #preparing data matrix, saved as 
 # samples_list.txt
 
-conditionA FP5C_1_RSEM
 conditionA FP5C_2_RSEM
 conditionA FP5C_3_RSEM
 
@@ -49,26 +62,33 @@ quit()
 #given transcript or gene-level abundance estimates from RSEM or eXpress:
 
 /panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
---out_prefix Trinity_gene --gene_trans_map none FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
+--out_prefix Trinity_gene --gene_trans_map none FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results \
 WP5C_1_RSEM.genes.results WP5C_2_RSEM.genes.results WP5C_3_RSEM.genes.results
 
 #Trinity_trans.isoform.counts.matrix to calculate DE
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
---method edgeR --samples_file samples_list.txt --dispersion 0.22749
+--method edgeR --samples_file samples_list.txt --dispersion 0.09449
 
 
-#0.001 threshold with 16 genes differentially expressed 
+#0.001 threshold with 60 genes differentially expressed 
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
 
 #list gene ID and fold change of each group 
-cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
-cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
 
 cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
 cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
+
+
+#########get annotation of the P450 transcript, and fold change 
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+
+0
 
 #########get annotation of the P450 transcript, and fold change 
 ####NO GENE WAS FOUND 
@@ -77,12 +97,38 @@ grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt Condition
 
 ####Obtaining NCBI NR annotation
 grep -Fwf ConditionA_up_ID.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/ncbi_NR/blast.NR_uniq.out > DE_A_up.txt
-grep -Fwf  ConditionA_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionA-UP.subset
+grep -Fwf  ConditionA_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset
 
 grep -Fwf ConditionB_up_ID.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/ncbi_NR/blast.NR_uniq.out > DE_B_up.txt
-grep -Fwf ConditionB_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-3_C2.conditionB-UP.subset
+grep -Fwf ConditionB_up_ID.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset
+
+
+###KEGG 
+cut -f 1 /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > KEGG_Ref_ID.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionA_up_ID.txt > KEGG_GO_condition_A.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionB_up_ID.txt > KEGG_GO_condition_B.txt
+
+grep -Fwf KEGG_GO_condition_A.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_A.txt
+
+K12121
+K02634
+K01188
+K03005
+K14488
+
+
+grep -Fwf KEGG_GO_condition_B.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_B.txt
+
 
 ++++++++++++
+
+
+
+
+
+
+
+
 
 
 
@@ -146,4 +192,4 @@ cd
 #0.001 threshold with 16 genes differentially expressed 
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
