@@ -8,7 +8,6 @@ conditionA FP5S_1_RSEM
 conditionA FP5S_2_RSEM
 conditionA FP5S_3_RSEM
 
-conditionB FP5C_1_RSEM
 conditionB FP5C_2_RSEM
 conditionB FP5C_3_RSEM
 
@@ -16,22 +15,54 @@ conditionB FP5C_3_RSEM
 module load perl 
 module load rsem
 rsem-generate-data-matrix FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
-FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results > FP5_gene_counts.matrix
+FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results > FP5_gene_counts.matrix
 
-module load R/3.3.0
+
+#QC dataset 
+module load R/3.3.3
+library(ggplot2)
+library(reshape2)
+mydata <- read.table("FP5_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+melted_cormat <- melt(cormat)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+  
+  
+  
+FP5C_1_RSEM.genes.results FP5C_1_RSEM.genes.results 1.0000000
+FP5C_2_RSEM.genes.results FP5C_1_RSEM.genes.results 0.7006996
+FP5C_3_RSEM.genes.results FP5C_1_RSEM.genes.results 0.7326257
+
+28 FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results 0.7006996
+29 FP5C_2_RSEM.genes.results FP5C_2_RSEM.genes.results 1.0000000
+30 FP5C_3_RSEM.genes.results FP5C_2_RSEM.genes.results 0.8855564
+
+34 FP5C_1_RSEM.genes.results FP5C_3_RSEM.genes.results 0.7326257
+35 FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results 0.8855564
+36 FP5C_3_RSEM.genes.results FP5C_3_RSEM.genes.results 1.0000000
+
+#Sample FP5C_1_RSEM.genes.results subject for removal 
+
+module load R/3.3.3
 #enter R
 
+module load R
 library(edgeR)
 
 Data_in <- read.table("FP5_gene_counts.matrix")
-DataGroups <- c("Treated", "Treated", "Treated", "Control", "Control","Control")
+DataGroups <- c("Treated", "Treated", "Treated", "Control","Control")
 d <- DGEList(counts=Data_in,group=factor(DataGroups))
 design <- model.matrix(~0+DataGroups)
 colnames(design) <- levels(DataGroups)
 #without doing 
 d1 <- estimateCommonDisp(d, verbose=T)
-Disp = 0.23562 , BCV = 0.4854 
-
+Disp = 0.10831 , BCV = 0.3291 
 
 #Trinity on MSI
 #/panfs/roc/msisoft/trinityrnaseq/2.5.1/Trinity
@@ -49,15 +80,71 @@ quit()
 
 /panfs/roc/msisoft/trinityrnaseq/2.5.1/util/abundance_estimates_to_matrix.pl --est_method RSEM \
 --out_prefix Trinity_gene --gene_trans_map none FP5S_1_RSEM.genes.results FP5S_2_RSEM.genes.results FP5S_3_RSEM.genes.results \
-FP5C_1_RSEM.genes.results FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results
+FP5C_2_RSEM.genes.results FP5C_3_RSEM.genes.results
+
+perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
+--method edgeR --samples_file samples_list.txt --dispersion 0.10831
 
 #Trinity_trans.isoform.counts.matrix to calculate DE
 
-#0.001 threshold with 16 genes differentially expressed 
-
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
+
+DEG 273 genes 
+
+#list gene ID and fold change of each group 
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
+
+cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
+cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
+
+#########get annotation of the P450 transcript, and fold change 
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+
+9 upregulated 
+0 downregulated 
+
+#upregulated 
+
+transcript/31827	CYP81D4	44.660	515	254	12	65	1597	1	488	3.15e-131	390
+transcript/32838	CYP81D4	44.660	515	254	12	74	1606	1	488	1.61e-131	389
+transcript/36036	CYP709B2	49.695	491	241	5	242	1705	29	516	1.27e-179	513
+transcript/36093	CYP74A1	50.476	525	248	3	5	1579	4	516	3.87e-165	476
+transcript/33344	CYP81D4	57.143	140	60	0	927	1346	265	404	2.87e-97	146
+transcript/35310	CYP89A6	52.711	461	201	9	216	1568	45	498	3.80e-166	478
+transcript/35356	CYP81D4	40.443	361	190	7	226	1299	66	404	1.84e-95	253
+transcript/34683	CYP709B2	49.491	491	242	5	241	1704	29	516	4.97e-179	512
+transcript/33741	CYP74A1	50.476	525	248	3	4	1578	4	516	1.12e-165	478
+-bash-4.2$ grep -Fwf DE_A_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset
+transcript/31827	conditionA	conditionB	2.44536190724406	8.60279199676391	1.8993453548462e-07	5.25468436954701e-05	431.136	410.554	133.905	54.262	63.017
+transcript/32838	conditionA	conditionB	2.66667689671048	6.80015665140645	5.64628651916731e-07	0.000129396875162022	159.265	115.334	34.261	17.846	13.906
+transcript/33344	conditionA	conditionB	3.00575188853506	5.94316698417713	9.13832599347642e-07	0.0001800910505204	95.680	55.920	15.249	8.519	5.008
+transcript/35356	conditionA	conditionB	2.86161060446588	6.52425358804131	1.46854115780233e-06	0.000262194362877626	153.585	82.321	24.268	12.793	10.525
+transcript/36036	conditionA	conditionB	5.2041869811198	2.42331986136409	2.40975363024913e-06	0.000393623001230428	13.097	2.665	0.804	0.055	0.237
+transcript/33741	conditionA	conditionB	2.93500131713978	4.05435765596234	5.95248660021689e-06	0.00081970812110341	31.964	4.826	9.501	2.073	1.888
+transcript/35310	conditionA	conditionB	2.73537729162036	4.22734405302281	4.1184830046511e-05	0.00378075679142571	33.369	15.709	3.687	2.797	2.340
+transcript/36093	conditionA	conditionB	3.3998531494531	3.62883373461578	5.99859609199913e-05	0.00508869854666302	29.519	2.786	4.320	1.247	0.995
+transcript/34683	conditionA	conditionB	6.36966426358688	2.72740035488933	0.000104003383904512	0.00762252963323067	18.685	1.070	0.132	0.055	0.090
 
 
+#Kegg
+#########Get gene KEGG function enrichment 
+#KEGG annotation file 
+/home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt
+cut -f 1 /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > KEGG_Ref_ID.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionA_up_ID.txt > KEGG_GO_condition_A.txt
+grep -Fxf KEGG_Ref_ID.txt ConditionB_up_ID.txt > KEGG_GO_condition_B.txt
 
-######look for P450 genes 
+grep -Fwf KEGG_GO_condition_A.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_A.txt
+grep -Fwf KEGG_GO_condition_B.txt /home/watkinse/qiuxx221/Result_files/ISO_Annotation/KEGG/Annotated_KEGG_nt.txt > GO_terms_B.txt
+
+
+B up 
+K12121
+K02634
+K01188
+K03005
+K14488
+
