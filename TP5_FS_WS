@@ -20,6 +20,22 @@ R/3.3.0
 module load R/3.3.0
 #enter R
 
+
+#QC dataset 
+module load R/3.3.3
+library(ggplot2)
+library(reshape2)
+mydata <- read.table("FP5_gene_counts.matrix", header = TRUE)
+head(mydata)
+#make correlation matrix 
+cormat <- cor(mydata, method = c("pearson"))
+head(cormat)
+#creating correlationship heatmap with ggplot2 
+melted_cormat <- melt(cormat)
+
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  geom_tile()
+
 library(edgeR)
 
 Data_in <- read.table("FP5_gene_counts.matrix")
@@ -65,9 +81,31 @@ WP5S_1_RSEM.genes.results WP5S_2_RSEM.genes.results WP5S_3_RSEM.genes.results
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/run_DE_analysis.pl --matrix Trinity_gene.isoform.counts.matrix \
 --method edgeR --samples_file samples_list.txt --dispersion 0.14398
 
-#0.001 threshold with 16 genes differentially expressed 
+#0.01 threshold with 16 genes differentially expressed 
 
 perl /panfs/roc/msisoft/trinityrnaseq/2.5.1/Analysis/DifferentialExpression/analyze_diff_expr.pl \
---matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-3 -C 2 --samples ../samples_list.txt 
+--matrix ../Trinity_gene.isoform.TMM.EXPR.matrix -P 1e-2 -C 2 --samples ../samples_list.txt 
 
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionA-UP.subset > ConditionA_up_gene_ID.txt
+cut -f 1,4 Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset > ConditionB_up_gene_ID.txt
+
+cut -f 1 ConditionA_up_gene_ID.txt > ConditionA_up_ID.txt
+cut -f 1 ConditionB_up_gene_ID.txt > ConditionB_up_ID.txt
+
+#########get annotation of the P450 transcript, and fold change 
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionA_up_ID.txt > DE_A_up.P450.txt
+grep -Fxf /home/watkinse/qiuxx221/Result_files/P450/CYP_NR_P450_ID.txt ConditionB_up_ID.txt > DE_B_up.P450.txt
+
+#water group had 4 upregulated P450
+
+-bash-4.2$ grep -Fwf DE_B_up.P450.txt /home/watkinse/qiuxx221/Result_files/P450/blastx.NR_uniq.out
+transcript/26020	CYP86A2	71.128	523	143	3	73	1635	1	517	0.0	748
+transcript/31241	CYP77B1	60.038	523	193	3	114	1673	1	510	0.0	559
+transcript/29388	CYP77A4	59.062	469	180	7	265	1665	53	511	0.0	577
+transcript/37946	CYP709B3	44.694	490	262	6	135	1592	33	517	2.19e-145	424
+-bash-4.2$ grep -Fwf DE_B_up.P450.txt Trinity_gene.isoform.counts.matrix.conditionA_vs_conditionB.edgeR.DE_results.P1e-2_C2.conditionB-UP.subset
+transcript/26020	conditionA	conditionB	-9.64981370929278	1.29696878465687	1.29675865479176e-07	6.91172363004005e-05	0.000	0.000	0.000	6.359	0.594	0.119
+transcript/29388	conditionA	conditionB	-4.18494415959659	2.24217775696448	2.42676264028663e-05	0.00391958935537204	0.363	0.193	0.227	12.333	1.469	0.339
+transcript/37946	conditionA	conditionB	-2.47323912142055	2.69099167004215	4.24329806486193e-05	0.00575002847941884	1.239	0.559	2.164	13.489	3.271	4.853
+transcript/31241	conditionA	conditionB	-3.9031878991589	4.5015137469584	4.56578903832308e-05	0.00608391389356551	1.292	1.322	2.144	61.675	7.961	0.879
 
