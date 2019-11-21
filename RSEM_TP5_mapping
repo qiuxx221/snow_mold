@@ -60,6 +60,38 @@ WP5C_1_RSEM
 0 + 0 singletons (0.00% : N/A)
 0 + 0 with mate mapped to a different chr
 0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+WP5C_2_RSEM.transcript.bam 
+159389164 + 0 in total (QC-passed reads + QC-failed reads)
+94510122 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+134769314 + 0 mapped (84.55% : N/A)
+64879042 + 0 paired in sequencing
+32439521 + 0 read1
+32439521 + 0 read2
+40259192 + 0 properly paired (62.05% : N/A)
+40259192 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+WP5C_3_RSEM.transcript.bam
+186736944 + 0 in total (QC-passed reads + QC-failed reads)
+111712538 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+157952018 + 0 mapped (84.59% : N/A)
+75024406 + 0 paired in sequencing
+37512203 + 0 read1
+37512203 + 0 read2
+46239480 + 0 properly paired (61.63% : N/A)
+46239480 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
+
 ####################################################################################################################################
 
 
@@ -96,14 +128,57 @@ rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_1_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_1_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_1_RSEM
 
+WP5S_1_RSEM.transcript.bam
+144646722 + 0 in total (QC-passed reads + QC-failed reads)
+87515662 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+124142996 + 0 mapped (85.82% : N/A)
+57131060 + 0 paired in sequencing
+28565530 + 0 read1
+28565530 + 0 read2
+36627334 + 0 properly paired (64.11% : N/A)
+36627334 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
 rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_2_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_2_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_2_RSEM
+
+samtools flagstat WP5S_2_RSEM.transcript.bam
+155120184 + 0 in total (QC-passed reads + QC-failed reads)
+93439842 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+132245480 + 0 mapped (85.25% : N/A)
+61680342 + 0 paired in sequencing
+30840171 + 0 read1
+30840171 + 0 read2
+38805638 + 0 properly paired (62.91% : N/A)
+38805638 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
 
 rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/WP5S_3_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM WP5S_3_RSEM
 
+160327282 + 0 in total (QC-passed reads + QC-failed reads)
+94770430 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+133970238 + 0 mapped (83.56% : N/A)
+65556852 + 0 paired in sequencing
+32778426 + 0 read1
+32778426 + 0 read2
+39199808 + 0 properly paired (59.80% : N/A)
+39199808 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
 
 ####################################################################################################################################
 ####################################################################################################################################
@@ -140,9 +215,39 @@ rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_1_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5C_1_RSEM
 
+-bash-4.2$ samtools flagstat FP5C_1_RSEM.transcript.bam
+169278088 + 0 in total (QC-passed reads + QC-failed reads)
+102156816 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+145279576 + 0 mapped (85.82% : N/A)
+67121272 + 0 paired in sequencing
+33560636 + 0 read1
+33560636 + 0 read2
+43122760 + 0 properly paired (64.25% : N/A)
+43122760 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
+
 rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_2_R2_clean.fastq \
 ~/Result_files/Fungicide_project/fungicid_paper/map_NGS_to_Isoseq/NR_ISO_RSEM FP5C_2_RSEM
+
+-bash-4.2$ samtools flagstat FP5C_2_RSEM.transcript.bam
+168929080 + 0 in total (QC-passed reads + QC-failed reads)
+101112970 + 0 secondary
+0 + 0 supplementary
+0 + 0 duplicates
+142883678 + 0 mapped (84.58% : N/A)
+67816110 + 0 paired in sequencing
+33908055 + 0 read1
+33908055 + 0 read2
+41770708 + 0 properly paired (61.59% : N/A)
+41770708 + 0 with itself and mate mapped
+0 + 0 singletons (0.00% : N/A)
+0 + 0 with mate mapped to a different chr
+0 + 0 with mate mapped to a different chr (mapQ>=5)
 
 rsem-calculate-expression --paired-end --bowtie2 \
 ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_3_R1_clean.fastq ~/Sequencing_reads/Fungicide_Project/FP5/FP5C_3_R2_clean.fastq \
